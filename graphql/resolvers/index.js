@@ -1,13 +1,17 @@
-const articlesResolver = require('./articles')
+const postsResolver = require('./posts')
 const users = require('./users')
 const usersResolver = require('./users')
 module.exports = {
   Query: {
-    ...articlesResolver.Query,
+    ...postsResolver.Query,
   },
 
   Mutation: {
     ...usersResolver.Mutation,
-    ...articlesResolver.Mutation,
+    ...postsResolver.Mutation,
+  },
+
+  Subscription: {
+    ...postsResolver.Subscription,
   },
 }
