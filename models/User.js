@@ -5,6 +5,10 @@ const userSchema = new Schema({
   password: String,
   email: String,
   createdAt: String,
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 module.exports = model('User', userSchema)

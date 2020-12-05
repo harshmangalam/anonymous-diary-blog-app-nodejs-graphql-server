@@ -26,6 +26,12 @@ const postSchema = new Schema({
       createdAt: String,
     },
   ],
+  
+  publish_progress:{
+    type:String,
+    enum:["CONFIRM","REJECT","WAIT"],
+    default:"WAIT"
+  },
 
   createdAt: String,
 })

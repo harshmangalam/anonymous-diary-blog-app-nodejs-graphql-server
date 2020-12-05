@@ -4,15 +4,61 @@ const checkAuth = require('../../utils/checkAuth')
 
 module.exports = {
   Query: {
-    async getPosts(_, { category }) {
+    async getPosts(_, { category, userId, status, all }) {
       try {
-        let posts
-        if (category) {
-          posts = await Post.find({ category }).populate('user')
-        } else {
-          posts = await Post.find().populate('user')
+        let post = {
+          categoryPosts: [],
+          userPosts: [],
+          statusPosts: [],
+          posts: [],
+          categoryAndStatusPosts: [],
         }
-        return posts
+
+        if (category && status) {
+          let data = await Post.find({
+            category,
+            publish_progress: status,
+          }).populate('user')
+
+          return {
+            ...post,
+            categoryAndStatusPosts: data,
+          }
+        }
+
+        if (category) {
+          let data = await Post.find({ category }).populate('user')
+          return {
+            ...post,
+            categoryPosts: data,
+          }
+        }
+
+        if (userId) {
+          let data = await Post.find({ user: userId }).populate('user')
+          return {
+            ...post,
+            userPosts: data,
+          }
+        }
+        if (status) {
+          let data = await Post.find({
+            publish_progress: status,
+          }).populate('user')
+
+          return {
+            ...post,
+            statusPosts: data,
+          }
+        }
+        if (all) {
+          let data = await Post.find().populate('user')
+          return {
+            ...post,
+            posts: data,
+          }
+        }
+        return post
       } catch (err) {
         throw new Error(err)
       }
@@ -38,7 +84,6 @@ module.exports = {
       { post: { category, title, tag, image, content } },
       context,
     ) {
-     
       const user = checkAuth(context)
       try {
         const postData = {
@@ -79,7 +124,7 @@ module.exports = {
           user: user.id,
         }
 
-        const post = await Post.findByIdAndUpdate(postId, postData, {
+        const post = await Post.findById(postId, postData, {
           new: true,
         }).populate('user')
 
@@ -91,15 +136,14 @@ module.exports = {
 
     async deletePost(_, { postId }, context) {
       const user = checkAuth(context)
-
       try {
         const post = await Post.findById(postId)
         if (!post) {
           throw new Error('Post not found')
         }
 
-        if (post.user == user.id) {
-          await post.delete()
+        if (post.user == user.id || user.isAdmin) {
+          await Post.findByIdAndDelete(postId)
           return 'Post deleted Sucessfully'
         } else {
           return new AuthenticationError('Action not allowed')
@@ -177,6 +221,23 @@ module.exports = {
             })
           }
 
+          await post.save()
+          return post
+        } else throw new Error('Post not found')
+      } catch (err) {
+        throw new Error(err)
+      }
+    },
+
+    // admin
+
+    async changePostStatus(_, { postId, status }, context) {
+      const { email } = checkAuth(context)
+
+      try {
+        const post = await Post.findById(postId).populate('user')
+        if (post) {
+          post.publish_progress = status
           await post.save()
           return post
         } else throw new Error('Post not found')
