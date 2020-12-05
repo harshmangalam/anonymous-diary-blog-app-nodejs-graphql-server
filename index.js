@@ -12,7 +12,7 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   cors:{
-    origin:"https://anonymousdiary.netlify.app/"
+    origin:"*"
   },
   context: ({ req }) => ({ req ,pubsub}),
 })
