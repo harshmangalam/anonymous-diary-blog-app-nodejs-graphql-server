@@ -11,6 +11,9 @@ const pubsub = new PubSub()
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  cors:{
+    origin:""
+  },
   context: ({ req }) => ({ req ,pubsub}),
 })
 
