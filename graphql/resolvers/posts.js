@@ -124,10 +124,9 @@ module.exports = {
           user: user.id,
         }
 
-        const post = await Post.findById(postId, postData, {
-          new: true,
-        }).populate('user')
+        await Post.updateOne({_id:postId},postData)
 
+        const post = await Post.findById(postId).populate('user')
         return post
       } catch (err) {
         throw new Error(err)
